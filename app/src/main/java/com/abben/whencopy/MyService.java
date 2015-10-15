@@ -9,10 +9,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.Message;
 import android.provider.CalendarContract;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -32,7 +30,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.logging.Handler;
 
 /**
  * Created by abbenyyyyyy on 2015/10/13.
@@ -47,7 +44,7 @@ public class MyService extends Service implements View.OnClickListener{
     private String text;
     private TranslationThred t;
     public boolean flag = true;//控制是否显示悬浮窗口
-    String result = null;
+    private String result = null;
     private TextView textView;
     private ImageButton bt1;
     private ImageButton bt2;
@@ -59,7 +56,7 @@ public class MyService extends Service implements View.OnClickListener{
         return new MyBinder();
     }
 
-    class MyBinder extends Binder{
+    public class MyBinder extends Binder{
 
         public MyService getService(){
             return MyService.this;
@@ -100,7 +97,6 @@ public class MyService extends Service implements View.OnClickListener{
         public void run() {
             while (!stopFlag){
                 result = translation(text);
-//                Log.i("线程中","result="+result);
                 if(result!=null){
                     break;
                 }
@@ -293,7 +289,6 @@ public class MyService extends Service implements View.OnClickListener{
 
             case R.id.imageButton2:
                 setupTranslationView(MyService.this,text);
-//                hideWindow();
                 break;
 
             case R.id.imageButton3:
@@ -310,7 +305,6 @@ public class MyService extends Service implements View.OnClickListener{
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.i("关闭标志", "关闭服务");
-//        t.stopThere();
+        t.stopThere();
     }
 }

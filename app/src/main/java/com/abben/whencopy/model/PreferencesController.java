@@ -1,4 +1,4 @@
-package com.abben.whencopy.controller;
+package com.abben.whencopy.model;
 
 import android.content.SharedPreferences;
 

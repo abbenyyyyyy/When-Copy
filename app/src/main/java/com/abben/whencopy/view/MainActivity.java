@@ -1,33 +1,23 @@
-package com.abben.whencopy;
+package com.abben.whencopy.view;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.net.Uri;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.abben.whencopy.controller.PreferencesController;
+import com.abben.whencopy.R;
+import com.abben.whencopy.model.PreferencesController;
 import com.abben.whencopy.model.MainModel;
+import com.abben.whencopy.presenter.ListViewAdapter;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     private PreferencesController preferencesController;

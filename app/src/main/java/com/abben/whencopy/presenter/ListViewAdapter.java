@@ -1,4 +1,4 @@
-package com.abben.whencopy;
+package com.abben.whencopy.presenter;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -9,7 +9,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,9 +18,10 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.abben.whencopy.MyService;
+import com.abben.whencopy.R;
 import com.abben.whencopy.model.MainModel;
 
-import java.security.Provider;
 import java.util.List;
 
 /**
@@ -113,9 +113,14 @@ public class ListViewAdapter extends BaseAdapter {
                             case "0":
                                 editor.putBoolean("MAIN_SWITCH", true);
                                 editor.commit();
-//                                statServer = new Intent(context,MyService.class);
+                                Switch swi;
+                                swi = (Switch) parent.findViewWithTag(1);
+                                swi.setChecked(true);
+                                swi = (Switch) parent.findViewWithTag(2);
+                                swi.setChecked(true);
+                                swi = (Switch) parent.findViewWithTag(3);
+                                swi.setChecked(true);
                                 context.bindService(statServer,serviceConnection, Context.BIND_AUTO_CREATE);
-//                                myService.flag = true;
                                 break;
                             //是搜索的开关
                             case "1":
