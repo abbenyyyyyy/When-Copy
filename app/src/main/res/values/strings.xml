@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">When Copy</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="detail_about">&#160;&#160;&#160;&#160;When&#160;&#160;Copy是一个个人开发的APP，所以不可避免存在BUG，若你发现BUG，希望能向作者反馈，谢谢使用。\n&#160;&#160;&#160;&#160;作者邮箱：ben714656@163.com</string>
+</resources>
