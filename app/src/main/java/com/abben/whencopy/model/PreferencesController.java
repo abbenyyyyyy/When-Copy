@@ -46,12 +46,10 @@ public class PreferencesController {
 
         editor.commit();
 
-
-
     }
 
     public List<MainModel> getList(){
-        List<MainModel> modelList = new ArrayList<MainModel>();
+        List<MainModel> modelList = new ArrayList<>();
 
         MainModel mainModel = new MainModel();
         mainModel.setIsShow_icon(false);

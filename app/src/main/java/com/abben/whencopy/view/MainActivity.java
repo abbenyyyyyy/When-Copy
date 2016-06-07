@@ -22,17 +22,14 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private PreferencesController preferencesController;
     private List<MainModel> modelList;
-    private ListViewAdapter listViewAdapter;
-    private ListView listView;
-    private SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        listView = (ListView) findViewById(R.id.list_view);
+        ListView  listView = (ListView) findViewById(R.id.list_view);
 
-        preferences = getSharedPreferences("init", MODE_PRIVATE);
+        SharedPreferences preferences = getSharedPreferences("init", MODE_PRIVATE);
 
         preferencesController = new PreferencesController(preferences);
 
@@ -41,13 +38,13 @@ public class MainActivity extends AppCompatActivity {
         modelList = preferencesController.getList();
         Resources res=getResources();
 
-        listViewAdapter = new ListViewAdapter(res,this,modelList);
+        ListViewAdapter listViewAdapter = new ListViewAdapter(res,this,modelList);
         listView.setAdapter(listViewAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if(modelList.get(position).getTitle().equals("关于")){
-                    dialog();
+                    showAboutDialog();
                 }
             }
         });
@@ -67,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
 
         int lastVerson = preferences.getInt("VERSION_KEY",0);
 
-        MainModel mainModel = new MainModel();
         preferencesController = new PreferencesController(preferences);
         //第一次启动APP,初始化preferences
         if(lastVerson!=currentVersion){
@@ -77,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**弹出关于的窗口*/
-    private void dialog(){
+    private void showAboutDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("关于");
         builder.setMessage(getString(R.string.detail_about));

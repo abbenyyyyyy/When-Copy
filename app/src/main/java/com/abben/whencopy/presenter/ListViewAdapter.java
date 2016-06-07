@@ -18,7 +18,7 @@ import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import com.abben.whencopy.MyService;
+import com.abben.whencopy.WhenCopyService;
 import com.abben.whencopy.R;
 import com.abben.whencopy.model.MainModel;
 
@@ -35,7 +35,7 @@ public class ListViewAdapter extends BaseAdapter {
     private Context context;
     private Intent statServer;
     private ServiceConnection serviceConnection;
-    private MyService myService;
+    private WhenCopyService myService;
 
     public ListViewAdapter(Resources res,Context context,List<MainModel> list){
         super();
@@ -48,7 +48,7 @@ public class ListViewAdapter extends BaseAdapter {
         serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
-                myService =  ((MyService.MyBinder)service).getService();
+                myService =  ((WhenCopyService.MyBinder)service).getService();
             }
 
             @Override
@@ -57,7 +57,7 @@ public class ListViewAdapter extends BaseAdapter {
             }
         };
 
-        statServer = new Intent(context,MyService.class);
+        statServer = new Intent(context,WhenCopyService.class);
 
         if(preferences.getBoolean("MAIN_SWITCH",false)){
             context.bindService(statServer,serviceConnection,Context.BIND_AUTO_CREATE);

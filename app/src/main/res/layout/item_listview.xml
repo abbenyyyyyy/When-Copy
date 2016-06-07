@@ -21,7 +21,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/item_title"
-        android:textSize="25sp"
+        android:textSize="16sp"
         android:textColor="#000000"
         android:text="wdaw"
         android:layout_alignTop="@+id/item_icon"
@@ -34,6 +34,7 @@
         android:id="@+id/item_remake"
         android:text="wda"
         android:layout_alignLeft="@+id/item_title"
+        android:textSize="14sp"
         android:layout_below="@+id/item_title" />
 
     <Switch

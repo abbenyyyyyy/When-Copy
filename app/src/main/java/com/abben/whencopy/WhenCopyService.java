@@ -34,7 +34,7 @@ import java.net.URLEncoder;
 /**
  * Created by abbenyyyyyy on 2015/10/13.
  */
-public class MyService extends Service implements View.OnClickListener{
+public class WhenCopyService extends Service implements View.OnClickListener{
     private View view;
     private View translationView;
     private WindowManager windowManager;
@@ -58,8 +58,8 @@ public class MyService extends Service implements View.OnClickListener{
 
     public class MyBinder extends Binder{
 
-        public MyService getService(){
-            return MyService.this;
+        public WhenCopyService getService(){
+            return WhenCopyService.this;
         }
     }
 
@@ -67,7 +67,7 @@ public class MyService extends Service implements View.OnClickListener{
     public void onCreate() {
         super.onCreate();
         flag = true;
-        setupView(MyService.this);
+        setupView(WhenCopyService.this);
         windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
         final ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         clipboardManager.setPrimaryClip(ClipData.newPlainText("", ""));
@@ -288,7 +288,7 @@ public class MyService extends Service implements View.OnClickListener{
                 break;
 
             case R.id.imageButton2:
-                setupTranslationView(MyService.this,text);
+                setupTranslationView(WhenCopyService.this,text);
                 break;
 
             case R.id.imageButton3:
