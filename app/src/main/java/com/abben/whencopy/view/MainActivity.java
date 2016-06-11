@@ -5,49 +5,74 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Switch;
 
 import com.abben.whencopy.R;
 import com.abben.whencopy.model.PreferencesController;
 import com.abben.whencopy.model.MainModel;
 import com.abben.whencopy.presenter.ListViewAdapter;
+import com.f2prateek.rx.preferences.Preference;
+import com.f2prateek.rx.preferences.RxSharedPreferences;
+import com.jakewharton.rxbinding.widget.RxCompoundButton;
 
 import java.util.List;
+
+import rx.functions.Action1;
 
 public class MainActivity extends AppCompatActivity {
     private PreferencesController preferencesController;
     private List<MainModel> modelList;
+    private Switch search_switch;
+    ImageView icon_search;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ListView  listView = (ListView) findViewById(R.id.list_view);
+        search_switch = (Switch) findViewById(R.id.search_switch);
+        icon_search = (ImageView) findViewById(R.id.icon_search);
 
-        SharedPreferences preferences = getSharedPreferences("init", MODE_PRIVATE);
+//        SharedPreferences preferences = getSharedPreferences("WhenCopy", MODE_PRIVATE);
 
-        preferencesController = new PreferencesController(preferences);
+//        preferencesController = new PreferencesController(preferences);
 
-        isFirstRun();
+//        isFirstRun();
 
-        modelList = preferencesController.getList();
-        Resources res=getResources();
+//        modelList = preferencesController.getList();
+//        Resources res=getResources();
 
-        ListViewAdapter listViewAdapter = new ListViewAdapter(res,this,modelList);
-        listView.setAdapter(listViewAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if(modelList.get(position).getTitle().equals("关于")){
-                    showAboutDialog();
-                }
-            }
-        });
+//        ListViewAdapter listViewAdapter = new ListViewAdapter(res,this,modelList);
+//        listView.setAdapter(listViewAdapter);
+//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                if(modelList.get(position).getTitle().equals("关于")){
+//                    showAboutDialog();
+//                }
+//            }
+//        });
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        RxSharedPreferences rxSharedPreferences = RxSharedPreferences.create(preferences);
+        Preference<Boolean> searchPreference = rxSharedPreferences.getBoolean("SEARCH_SWITCH",true);
+        search_switch.setChecked(searchPreference.get());
+
+        RxCompoundButton.checkedChanges(search_switch)
+                .subscribe(new Action1<Boolean>() {
+                    @Override
+                    public void call(Boolean aBoolean) {
+                        icon_search.setImageResource(aBoolean?R.mipmap.search_true:R.mipmap.search_false);
+                    }
+                });
+
 
     }
 
