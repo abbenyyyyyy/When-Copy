@@ -6,18 +6,25 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.provider.CalendarContract;
 import android.support.annotation.Nullable;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.abben.whencopy.view.TopViewController;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -38,7 +45,6 @@ public class WhenCopyService extends Service implements View.OnClickListener{
     private View view;
     private View translationView;
     private WindowManager windowManager;
-    private WindowManager.LayoutParams layoutParams;
     private final String start_url = "http://openapi.baidu.com/public/2.0/bmt/translate?client_id=TRsKBvAptS60HNG8kkheuFwB&q=";
     private final String end_url = "&from=auto&to=auto";
     private String text;
@@ -49,6 +55,7 @@ public class WhenCopyService extends Service implements View.OnClickListener{
     private ImageButton bt1;
     private ImageButton bt2;
     private ImageButton bt3;
+    private TopViewController topViewController;
 
     @Nullable
     @Override
@@ -57,7 +64,6 @@ public class WhenCopyService extends Service implements View.OnClickListener{
     }
 
     public class MyBinder extends Binder{
-
         public WhenCopyService getService(){
             return WhenCopyService.this;
         }
@@ -67,7 +73,7 @@ public class WhenCopyService extends Service implements View.OnClickListener{
     public void onCreate() {
         super.onCreate();
         flag = true;
-        setupView(WhenCopyService.this);
+        topViewController = new TopViewController(WhenCopyService.this);
         windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
         final ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         clipboardManager.setPrimaryClip(ClipData.newPlainText("", ""));
@@ -77,7 +83,7 @@ public class WhenCopyService extends Service implements View.OnClickListener{
                 ClipData clipData = clipboardManager.getPrimaryClip();
                 if ((clipData.getItemCount()==1) && flag){
                     text = clipData.getItemAt(0).getText().toString();
-                    windowManager.addView(view, layoutParams);
+                    topViewController.showSelect();
                     t = new TranslationThred();
                     t.start();
                 }
@@ -86,7 +92,9 @@ public class WhenCopyService extends Service implements View.OnClickListener{
 
     }
 
+    public void notifySelectViewVisbility(){
 
+    }
 
 
     /**翻译的线程*/
@@ -108,45 +116,39 @@ public class WhenCopyService extends Service implements View.OnClickListener{
         }
     }
 
-    /**生成选择悬浮窗*/
-    public void setupView(Context context){
-        view = LayoutInflater.from(context).inflate(R.layout.window_main,null);
-        bt1 = (ImageButton) view.findViewById(R.id.imageButton);
-        bt2 = (ImageButton) view.findViewById(R.id.imageButton2);
-        bt3 = (ImageButton) view.findViewById(R.id.imageButton3);
-        bt1.setOnClickListener(this);
-        bt2.setOnClickListener(this);
-        bt3.setOnClickListener(this);
 
-        view.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                switch (keyCode){
-                    case KeyEvent.KEYCODE_BACK:
-                        hideWindow();
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-        });
 
-        layoutParams = new WindowManager.LayoutParams();
+    private WindowManager.LayoutParams getPopViewParams() {
+        int w = WindowManager.LayoutParams.MATCH_PARENT;
+        int h = WindowManager.LayoutParams.MATCH_PARENT;
 
-        //设置type为最顶窗口
-        layoutParams.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
-        //允许窗口进行交互，以及BACK键得使用
-        layoutParams.flags = WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-        layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
-        layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        layoutParams.gravity = Gravity.BOTTOM;
+        int flags = 0;
+        int type;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            type = WindowManager.LayoutParams.TYPE_TOAST;
+        } else {
+            type = WindowManager.LayoutParams.TYPE_PHONE;
+        }
+
+        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(w, h, type, flags, PixelFormat.TRANSLUCENT);
+        layoutParams.gravity = Gravity.TOP;
+        layoutParams.format = PixelFormat.RGBA_8888;
+        layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+
+        layoutParams.gravity = Gravity.CENTER | Gravity.TOP;
+        layoutParams.x = 0;
+        layoutParams.y = 0;
+        return layoutParams;
     }
 
     /**关闭选择悬浮窗口*/
     public void hideWindow(){
         if(view!=null) {
             windowManager.removeViewImmediate(view);
+            view.setOnKeyListener(null);
+            view.setOnClickListener(null);
         }
+
     }
 
     /**生成翻译窗口并显示*/
@@ -168,7 +170,7 @@ public class WhenCopyService extends Service implements View.OnClickListener{
             }
         });
         hideWindow();
-        windowManager.addView(translationView,layoutParams);
+        windowManager.addView(translationView,getPopViewParams());
     }
 
     /**改变窗口图标为不可见*/
@@ -305,6 +307,5 @@ public class WhenCopyService extends Service implements View.OnClickListener{
     @Override
     public void onDestroy() {
         super.onDestroy();
-        t.stopThere();
     }
 }

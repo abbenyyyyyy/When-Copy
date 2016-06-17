@@ -1,17 +1,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    >
-
-    <ListView
-        android:id="@+id/list_view"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:footerDividersEnabled="true"
-        android:visibility="gone">
-
-    </ListView>
+    android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -41,8 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="1px"
         android:background="#b6b6b6"
-        android:visibility="gone"
-        />
+        android:visibility="gone" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -50,7 +39,7 @@
         android:layout_margin="@dimen/activity_vertical_margin">
 
         <ImageView
-            android:id="@+id/icon_search"
+            android:id="@+id/search_icon"
             android:layout_width="@dimen/img_width"
             android:layout_height="@dimen/img_width"
             android:src="@mipmap/search_true" />
@@ -59,15 +48,15 @@
             style="@style/topTextviewTheme"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/icon_search"
+            android:layout_toRightOf="@+id/search_icon"
             android:text="搜索" />
 
         <TextView
             style="@style/bottomTextviewTheme"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/icon_search"
-            android:layout_toRightOf="@+id/icon_search"
+            android:layout_alignBottom="@+id/search_icon"
+            android:layout_toRightOf="@+id/search_icon"
             android:text="通过百度搜索复制内容" />
 
         <Switch
@@ -79,8 +68,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1px"
-        android:background="#b6b6b6"
-        />
+        android:background="#b6b6b6" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -88,7 +76,7 @@
         android:layout_margin="@dimen/activity_vertical_margin">
 
         <ImageView
-            android:id="@+id/item_icon_third"
+            android:id="@+id/translation_icon"
             android:layout_width="@dimen/img_width"
             android:layout_height="@dimen/img_width"
             android:src="@mipmap/translation_true" />
@@ -97,18 +85,19 @@
             style="@style/topTextviewTheme"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/item_icon_third"
+            android:layout_toRightOf="@+id/translation_icon"
             android:text="翻译" />
 
         <TextView
             style="@style/bottomTextviewTheme"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/item_icon_third"
-            android:layout_toRightOf="@+id/item_icon_third"
+            android:layout_alignBottom="@+id/translation_icon"
+            android:layout_toRightOf="@+id/translation_icon"
             android:text="通过百度翻译翻译复制内容" />
 
         <Switch
+            android:id="@+id/translation_switch"
             android:layout_width="match_parent"
             android:layout_height="@dimen/img_width" />
     </RelativeLayout>
@@ -116,8 +105,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1px"
-        android:background="#b6b6b6"
-        />
+        android:background="#b6b6b6" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -125,7 +113,7 @@
         android:layout_margin="@dimen/activity_vertical_margin">
 
         <ImageView
-            android:id="@+id/item_icon_fourth"
+            android:id="@+id/insertevents_icon"
             android:layout_width="@dimen/img_width"
             android:layout_height="@dimen/img_width"
             android:src="@mipmap/insertevents_true" />
@@ -134,18 +122,19 @@
             style="@style/topTextviewTheme"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/item_icon_fourth"
+            android:layout_toRightOf="@+id/insertevents_icon"
             android:text="日历事务" />
 
         <TextView
             style="@style/bottomTextviewTheme"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/item_icon_fourth"
-            android:layout_toRightOf="@+id/item_icon_fourth"
+            android:layout_alignBottom="@+id/insertevents_icon"
+            android:layout_toRightOf="@+id/insertevents_icon"
             android:text="在日历创建复制内容的事务" />
 
         <Switch
+            android:id="@+id/insertevents_switch"
             android:layout_width="match_parent"
             android:layout_height="@dimen/img_width" />
     </RelativeLayout>
@@ -153,10 +142,10 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1px"
-        android:background="#b6b6b6"
-        />
+        android:background="#b6b6b6" />
 
     <RelativeLayout
+        android:id="@+id/about_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/activity_vertical_margin">
@@ -183,15 +172,13 @@
             android:layout_alignBottom="@+id/item_icon_fifth"
             android:layout_toRightOf="@+id/item_icon_fifth"
             android:text="关于"
-            android:visibility="gone"
-            />
+            android:visibility="gone" />
 
     </RelativeLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1px"
-        android:background="#b6b6b6"
-        />
+        android:background="#b6b6b6" />
 
 </LinearLayout>

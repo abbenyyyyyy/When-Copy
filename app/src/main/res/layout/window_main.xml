@@ -1,35 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="horizontal"
+    android:background="#77000000"
+    android:orientation="vertical">
 
-    >
+    <LinearLayout
+        android:id="@+id/selectLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#fff"
+        android:orientation="horizontal">
 
+        <ImageButton
+            android:id="@+id/imageButton"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@mipmap/ic_search" />
 
-    <ImageButton
-        android:layout_width="fill_parent"
-        android:layout_height="80dp"
-        android:id="@+id/imageButton"
-        android:src="@mipmap/ic_search"
-        android:layout_weight="1"
-        />
+        <ImageButton
+            android:id="@+id/imageButton2"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@mipmap/ic_translation" />
 
-    <ImageButton
-        android:layout_width="fill_parent"
-        android:layout_height="80dp"
-        android:id="@+id/imageButton2"
-        android:src="@mipmap/ic_translation"
-        android:layout_weight="1"
-        />
+        <ImageButton
+            android:id="@+id/imageButton3"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:src="@mipmap/ic_insertevents" />
 
-    <ImageButton
-        android:layout_width="fill_parent"
-        android:layout_height="80dp"
-        android:id="@+id/imageButton3"
-        android:src="@mipmap/ic_insertevents"
-        android:layout_weight="1"
-        />
+    </LinearLayout>
 
 </LinearLayout>
