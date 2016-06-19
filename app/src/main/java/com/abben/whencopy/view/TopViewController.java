@@ -65,7 +65,11 @@ public class TopViewController implements View.OnClickListener, View.OnTouchList
 
     @Override
     public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.imageButton:
 
+                break;
+        }
     }
 
     @Override

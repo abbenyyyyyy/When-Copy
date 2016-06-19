@@ -7,24 +7,23 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.CalendarContract;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.abben.whencopy.view.TopViewController;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -45,8 +44,6 @@ public class WhenCopyService extends Service implements View.OnClickListener{
     private View view;
     private View translationView;
     private WindowManager windowManager;
-    private final String start_url = "http://openapi.baidu.com/public/2.0/bmt/translate?client_id=TRsKBvAptS60HNG8kkheuFwB&q=";
-    private final String end_url = "&from=auto&to=auto";
     private String text;
     private TranslationThred t;
     public boolean flag = true;//控制是否显示悬浮窗口
@@ -56,6 +53,7 @@ public class WhenCopyService extends Service implements View.OnClickListener{
     private ImageButton bt2;
     private ImageButton bt3;
     private TopViewController topViewController;
+
 
     @Nullable
     @Override
@@ -221,18 +219,19 @@ public class WhenCopyService extends Service implements View.OnClickListener{
         startActivity(intent);
     }
 
-    /**得到百度翻译的结果*/
+    /**得到有道翻译的结果*/
     public String translation(String value){
-        String result = null;
-        HttpURLConnection connection = null;
-        InputStream is =null;
+        //范例:http://fanyi.youdao.com/openapi.do?keyfrom=When-Copy&key=870362664&type=data&doctype=<doctype>&version=1.1&q=要翻译的文本
+        String result = "";
+        HttpURLConnection connection ;
         String encode = null;
         try {
             encode = URLEncoder.encode(value,"UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        String all_url = start_url + encode +end_url;
+        String all_url = "http://fanyi.youdao.com/openapi.do?keyfrom=When-Copy&key=870362664&type=data&doctype=<doctype>&version=1.1&q="
+                + encode;
         try {
             URL url = new URL(all_url);
             connection = (HttpURLConnection) url.openConnection();
@@ -242,9 +241,12 @@ public class WhenCopyService extends Service implements View.OnClickListener{
             connection.setRequestMethod("GET");
             String jsonString = readStream(connection.getInputStream());
             JSONObject jsonObject = new JSONObject(jsonString);
-            JSONArray jsonArray = jsonObject.getJSONArray("trans_result");
-            jsonObject = jsonArray.getJSONObject(0);
-            result = jsonObject.getString("dst");
+            Gson gson = new Gson();
+            TranslationBean translationBean = gson.fromJson(jsonString,TranslationBean.class);
+            Log.i("wwwww","标志解析:"+translationBean.getTranslation().toString());
+//            JSONArray jsonArray = jsonObject.getJSONArray("trans_result");
+//            jsonObject = jsonArray.getJSONObject(0);
+//            result = jsonObject.getString("dst");
         } catch (Exception e) {
             e.printStackTrace();
         }
