@@ -7,27 +7,32 @@ import java.util.List;
  */
 public class TranslationBean {
 
+    /**
+     * usphonetic : hɛˈlo, hə-
+     * phonetic : hə'ləʊ; he-
+     * ukphonetic : hə'ləʊ; he-
+     * explains : ["n. 表示问候， 惊奇或唤起注意时的用语","int. 喂；哈罗","n. (Hello)人名；(法)埃洛"]
+     */
 
     private BasicBean basic;
     /**
-     * translation : ["达克"]
-     * basic : {"explains":["n. 音频压缩软件（Toms lossless Audio Kompressor）"]}
-     * query : TAK
+     * translation : ["你好"]
+     * basic : {"usphonetic":"hɛˈlo, hə-","phonetic":"hə'ləʊ; he-","ukphonetic":"hə'ləʊ; he-","explains":["n. 表示问候， 惊奇或唤起注意时的用语","int. 喂；哈罗","n. (Hello)人名；(法)埃洛"]}
+     * query : hello
      * errorCode : 0
-     * web : [{"value":["Tom's verlustfreier Audiokompressor","Toms Lossless Audio Kompressor","达府"],"key":"TAK"},{"value":["坂口拓","板口拓"],"key":"Tak Sakaguchi"},{"value":["麦德华"],"key":"Tak Mak"}]
+     * web : [{"value":["你好","您好","hello"],"key":"Hello"},{"value":["헬로 베이비","Hello Baby","Hello Baby"],"key":"Hello Baby"},{"value":["开心家族 (2010年电影)","开心鬼上身","片"],"key":"Hello Ghost"}]
      */
 
     private String query;
     private int errorCode;
     private List<String> translation;
     /**
-     * value : ["Tom's verlustfreier Audiokompressor","Toms Lossless Audio Kompressor","达府"]
-     * key : TAK
+     * value : ["你好","您好","hello"]
+     * key : Hello
      */
 
     private List<WebBean> web;
 
-    /**有道词典-基本词典*/
     public BasicBean getBasic() {
         return basic;
     }
@@ -69,7 +74,34 @@ public class TranslationBean {
     }
 
     public static class BasicBean {
+        private String usphonetic;
+        private String phonetic;
+        private String ukphonetic;
         private List<String> explains;
+
+        public String getUsphonetic() {
+            return usphonetic;
+        }
+
+        public void setUsphonetic(String usphonetic) {
+            this.usphonetic = usphonetic;
+        }
+
+        public String getPhonetic() {
+            return phonetic;
+        }
+
+        public void setPhonetic(String phonetic) {
+            this.phonetic = phonetic;
+        }
+
+        public String getUkphonetic() {
+            return ukphonetic;
+        }
+
+        public void setUkphonetic(String ukphonetic) {
+            this.ukphonetic = ukphonetic;
+        }
 
         public List<String> getExplains() {
             return explains;

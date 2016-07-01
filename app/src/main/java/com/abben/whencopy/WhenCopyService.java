@@ -6,27 +6,17 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.PixelFormat;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.provider.CalendarContract;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.ImageButton;
-import android.widget.TextView;
 
 import com.abben.whencopy.view.TopViewController;
 import com.google.gson.Gson;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -37,23 +27,17 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
-/**
- * Created by abbenyyyyyy on 2015/10/13.
- */
-public class WhenCopyService extends Service implements View.OnClickListener{
-    private View view;
-    private View translationView;
-    private WindowManager windowManager;
-    private String text;
-    private TranslationThred t;
-    public boolean flag = true;//控制是否显示悬浮窗口
-    private String result = null;
-    private TextView textView;
-    private ImageButton bt1;
-    private ImageButton bt2;
-    private ImageButton bt3;
-    private TopViewController topViewController;
 
+public class WhenCopyService extends Service implements View.OnClickListener{
+    private String text;
+    private TranslationBean translationBean;
+    private TopViewController topViewController;
+    public final static int SELECT_SEARCH_INDEX = 0;
+    public final static int SELECT_TRANSLATION_INDEX = 1;
+    public final static int SELECT_INSERTEVENTS_INDEX = 2;
+
+    private boolean[] visibilityFlag = {false ,false, false};
+    private int visibilityNumble = 0;
 
     @Nullable
     @Override
@@ -70,141 +54,89 @@ public class WhenCopyService extends Service implements View.OnClickListener{
     @Override
     public void onCreate() {
         super.onCreate();
-        flag = true;
         topViewController = new TopViewController(WhenCopyService.this);
-        windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        topViewController.updateOnClickListener(this);
         final ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         clipboardManager.setPrimaryClip(ClipData.newPlainText("", ""));
         clipboardManager.addPrimaryClipChangedListener(new ClipboardManager.OnPrimaryClipChangedListener() {
             @Override
             public void onPrimaryClipChanged() {
                 ClipData clipData = clipboardManager.getPrimaryClip();
-                if ((clipData.getItemCount()==1) && flag){
+                if ( clipData.getItemCount()==1 ){
                     text = clipData.getItemAt(0).getText().toString();
-                    topViewController.showSelect();
-                    t = new TranslationThred();
-                    t.start();
+                    howToShowSleect(visibilityNumble,visibilityFlag);
+//                    new TranslationAsy().execute(text);
                 }
             }
         });
 
     }
 
-    public void notifySelectViewVisbility(){
+    public void notifySelectViewVisbility(int changeVisibityIndex ,boolean visibility){
 
+        this.visibilityFlag[changeVisibityIndex] = visibility;
+        int numble = 0;
+        for(boolean x : visibilityFlag){
+            if(x){
+                numble ++;
+            }
+        }
+        visibilityNumble = numble;
     }
 
+    private void howToShowSleect(int visibilityNumble,boolean[] visibilityFlag ){
+        switch (visibilityNumble){
+            case 1:
+                for(int i =0;i<visibilityFlag.length;i++){
+                    if(visibilityFlag[i]){
+                        switch (i){
+                            case SELECT_SEARCH_INDEX:
+                                searchByBaidu(text);
+                                break;
+                            case SELECT_TRANSLATION_INDEX:
+//                                topViewController.showTranslation(translationBean);
+                                new TranslationAsy().execute(text);
+                                break;
+                            case SELECT_INSERTEVENTS_INDEX:
+                                insertEvent(text);
+                                break;
+                        }
+                        break;
+                    }
+                }
+                break;
+            case 2:
+                topViewController.showSelect(visibilityFlag);
+                break;
+            case 3:
+                topViewController.showSelect(visibilityFlag);
+                break;
+            default:
+                break;
+        }
+    }
 
-    /**翻译的线程*/
-    class TranslationThred extends Thread {
-        private boolean stopFlag = false;
+    class TranslationAsy extends AsyncTask<String,Void,TranslationBean>{
 
         @Override
-        public void run() {
-            while (!stopFlag){
-                result = translation(text);
-                if(result!=null){
-                    break;
-                }
+        protected void onPostExecute(TranslationBean translationBean2) {
+            if(translationBean2!=null){
+                translationBean = translationBean2;
+                topViewController.showTranslation(translationBean);
             }
         }
 
-        public void stopThere(){
-            stopFlag = true;
-        }
-    }
-
-
-
-    private WindowManager.LayoutParams getPopViewParams() {
-        int w = WindowManager.LayoutParams.MATCH_PARENT;
-        int h = WindowManager.LayoutParams.MATCH_PARENT;
-
-        int flags = 0;
-        int type;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            type = WindowManager.LayoutParams.TYPE_TOAST;
-        } else {
-            type = WindowManager.LayoutParams.TYPE_PHONE;
-        }
-
-        WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(w, h, type, flags, PixelFormat.TRANSLUCENT);
-        layoutParams.gravity = Gravity.TOP;
-        layoutParams.format = PixelFormat.RGBA_8888;
-        layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-
-        layoutParams.gravity = Gravity.CENTER | Gravity.TOP;
-        layoutParams.x = 0;
-        layoutParams.y = 0;
-        return layoutParams;
-    }
-
-    /**关闭选择悬浮窗口*/
-    public void hideWindow(){
-        if(view!=null) {
-            windowManager.removeViewImmediate(view);
-            view.setOnKeyListener(null);
-            view.setOnClickListener(null);
+        @Override
+        protected TranslationBean doInBackground(String... params) {
+            String needTranslationText = params[0];
+            return translation(needTranslationText);
         }
 
     }
 
-    /**生成翻译窗口并显示*/
-    public void setupTranslationView(Context context,String text){
-        translationView = LayoutInflater.from(context).inflate(R.layout.window_translation,null);
-        textView = (TextView) translationView.findViewById(R.id.translation);
-        textView.setOnClickListener(this);
-        textView.setText(result);
-        view.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                switch (keyCode){
-                    case KeyEvent.KEYCODE_BACK:
-                        windowManager.removeViewImmediate(translationView);
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-        });
-        hideWindow();
-        windowManager.addView(translationView,getPopViewParams());
-    }
-
-    /**改变窗口图标为不可见*/
-    public void changeWindowGone(int num){
-        switch (num){
-            case 1:
-                bt1.setVisibility(View.GONE);
-                break;
-            case 2:
-                bt2.setVisibility(View.GONE);
-                break;
-
-            case 3:
-                bt2.setVisibility(View.GONE);
-                break;
-        }
-    }
-
-    /**改变窗口图标为可见*/
-    public void changeWindowVis(int num){
-        switch (num){
-            case 1:
-                bt1.setVisibility(View.VISIBLE);
-                break;
-            case 2:
-                bt2.setVisibility(View.VISIBLE);
-                break;
-
-            case 3:
-                bt2.setVisibility(View.VISIBLE);
-                break;
-        }
-    }
 
     /**启动百度搜索*/
-    public void searchByBaidu(String text){
+    private void searchByBaidu(String text){
         Uri uri = Uri.parse("http://www.baidu.com/s?wd=" + text);
         Intent intent = new Intent(Intent.ACTION_VIEW,uri);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -212,7 +144,7 @@ public class WhenCopyService extends Service implements View.OnClickListener{
     }
 
     /**插入日历事件*/
-    public void insertEvent(String text){
+    private void insertEvent(String text){
         Intent intent = new Intent(Intent.ACTION_INSERT).setData(CalendarContract.Events.CONTENT_URI)
                 .putExtra(CalendarContract.Events.TITLE,text);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -220,9 +152,9 @@ public class WhenCopyService extends Service implements View.OnClickListener{
     }
 
     /**得到有道翻译的结果*/
-    public String translation(String value){
+    private TranslationBean translation(String value){
         //范例:http://fanyi.youdao.com/openapi.do?keyfrom=When-Copy&key=870362664&type=data&doctype=<doctype>&version=1.1&q=要翻译的文本
-        String result = "";
+        TranslationBean translationBean = new TranslationBean();
         HttpURLConnection connection ;
         String encode = null;
         try {
@@ -230,7 +162,7 @@ public class WhenCopyService extends Service implements View.OnClickListener{
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        String all_url = "http://fanyi.youdao.com/openapi.do?keyfrom=When-Copy&key=870362664&type=data&doctype=<doctype>&version=1.1&q="
+        String all_url = "http://fanyi.youdao.com/openapi.do?keyfrom=When-Copy&key=870362664&type=data&doctype=json&version=1.1&q="
                 + encode;
         try {
             URL url = new URL(all_url);
@@ -239,18 +171,13 @@ public class WhenCopyService extends Service implements View.OnClickListener{
             connection.setDoOutput(true);
             connection.setUseCaches(false);
             connection.setRequestMethod("GET");
-            String jsonString = readStream(connection.getInputStream());
-            JSONObject jsonObject = new JSONObject(jsonString);
+            String jsonString = readStream(connection.getInputStream()).replace("-","");
             Gson gson = new Gson();
-            TranslationBean translationBean = gson.fromJson(jsonString,TranslationBean.class);
-            Log.i("wwwww","标志解析:"+translationBean.getTranslation().toString());
-//            JSONArray jsonArray = jsonObject.getJSONArray("trans_result");
-//            jsonObject = jsonArray.getJSONObject(0);
-//            result = jsonObject.getString("dst");
+            translationBean = gson.fromJson(jsonString,TranslationBean.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return result;
+        return translationBean;
     }
 
     /**通过readStream方法将字节流变成字符流，获得完整的网络数据JSON格式数据*/
@@ -286,28 +213,22 @@ public class WhenCopyService extends Service implements View.OnClickListener{
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-            case R.id.imageButton:
+            case R.id.searchSelect:
                 searchByBaidu(text);
-                hideWindow();
+                topViewController.removeView();
                 break;
 
-            case R.id.imageButton2:
-                setupTranslationView(WhenCopyService.this,text);
+            case R.id.translationSelect:
+//                topViewController.showTranslation(translationBean);
+                new TranslationAsy().execute(text);
                 break;
 
-            case R.id.imageButton3:
+            case R.id.inserteventsSelect:
                 insertEvent(text);
-                hideWindow();
+                topViewController.removeView();
                 break;
 
-            case R.id.translation:
-                windowManager.removeViewImmediate(translationView);
-                break;
         }
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
 }

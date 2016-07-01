@@ -23,9 +23,8 @@ import com.jakewharton.rxbinding.widget.RxCompoundButton;
 import rx.functions.Action1;
 
 public class MainActivity extends AppCompatActivity {
-    private Switch search_switch , translation_switch , insertevents_switch;
-    private ImageView search_icon, translation_icon , insertevents_icon;
-    private Preference<Boolean> searchPreference , translationPreference , inserteventsPreference;
+    private ImageView search_icon, translation_icon, insertevents_icon;
+    private Preference<Boolean> searchPreference, translationPreference, inserteventsPreference;
     private ServiceConnection serviceConnection;
     private WhenCopyService whenCopyService;
 
@@ -36,31 +35,23 @@ public class MainActivity extends AppCompatActivity {
         serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
-                whenCopyService = ((WhenCopyService.MyBinder)service).getService();
+                whenCopyService = ((WhenCopyService.MyBinder) service).getService();
+                initView();
             }
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
-                Log.i("wwwww","回调开启失败标志");
-                Intent startService = new Intent(MainActivity.this,WhenCopyService.class);
-                bindService(startService,serviceConnection,BIND_AUTO_CREATE);
+                Intent startService = new Intent(MainActivity.this, WhenCopyService.class);
+                bindService(startService, serviceConnection, BIND_AUTO_CREATE);
             }
         };
 
-        Intent startService = new Intent(MainActivity.this,WhenCopyService.class);
-        bindService(startService,serviceConnection,BIND_AUTO_CREATE);
-
-        initView();
+        Intent startService = new Intent(MainActivity.this, WhenCopyService.class);
+        bindService(startService, serviceConnection, BIND_AUTO_CREATE);
 
     }
 
-    @Override
-    protected void onDestroy() {
-        unbindService(serviceConnection);
-        super.onDestroy();
-    }
-
-    private void initView(){
+    private void initView() {
         RelativeLayout aboutLayout = (RelativeLayout) findViewById(R.id.about_layout);
         aboutLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,62 +66,76 @@ public class MainActivity extends AppCompatActivity {
         checkUpdateInserteventsSwitch(rxSharedPreferences);
     }
 
-    /**绑定搜索searchSwitch的变化*/
-    private void checkUpdateSearchSwitch(RxSharedPreferences rxSharedPreferences){
-        search_switch = (Switch) findViewById(R.id.search_switch);
+    /**
+     * 绑定搜索searchSwitch的变化
+     */
+    private void checkUpdateSearchSwitch(RxSharedPreferences rxSharedPreferences) {
+        Switch search_switch = (Switch) findViewById(R.id.search_switch);
         search_icon = (ImageView) findViewById(R.id.search_icon);
 
-        searchPreference = rxSharedPreferences.getBoolean("SEARCH_SWITCH",true);
+        searchPreference = rxSharedPreferences.getBoolean("SEARCH_SWITCH", true);
         search_switch.setChecked(searchPreference.get());
+        whenCopyService.notifySelectViewVisbility(WhenCopyService.SELECT_SEARCH_INDEX,searchPreference.get());
 
         RxCompoundButton.checkedChanges(search_switch)
                 .subscribe(new Action1<Boolean>() {
                     @Override
                     public void call(Boolean aBoolean) {
                         searchPreference.set(aBoolean);
-                        search_icon.setImageResource(aBoolean?R.mipmap.search_true:R.mipmap.search_false);
+                        search_icon.setImageResource(aBoolean ? R.mipmap.search_true : R.mipmap.search_false);
+                        whenCopyService.notifySelectViewVisbility(WhenCopyService.SELECT_SEARCH_INDEX,aBoolean);
                     }
                 });
     }
 
-    /**绑定翻译translationSwitch的变化*/
-    private void checkUpdateTranslationSwitch(RxSharedPreferences rxSharedPreferences){
-        translation_switch = (Switch) findViewById(R.id.translation_switch);
+    /**
+     * 绑定翻译translationSwitch的变化
+     */
+    private void checkUpdateTranslationSwitch(RxSharedPreferences rxSharedPreferences) {
+        Switch translation_switch = (Switch) findViewById(R.id.translation_switch);
         translation_icon = (ImageView) findViewById(R.id.translation_icon);
 
-        translationPreference = rxSharedPreferences.getBoolean("TRANSLATION_SWITCH",true);
+        translationPreference = rxSharedPreferences.getBoolean("TRANSLATION_SWITCH", true);
         translation_switch.setChecked(translationPreference.get());
+        whenCopyService.notifySelectViewVisbility(WhenCopyService.SELECT_TRANSLATION_INDEX,translationPreference.get());
 
         RxCompoundButton.checkedChanges(translation_switch)
                 .subscribe(new Action1<Boolean>() {
                     @Override
                     public void call(Boolean aBoolean) {
                         translationPreference.set(aBoolean);
-                        translation_icon.setImageResource(aBoolean?R.mipmap.translation_true:R.mipmap.translation_false);
+                        translation_icon.setImageResource(aBoolean ? R.mipmap.translation_true : R.mipmap.translation_false);
+                        whenCopyService.notifySelectViewVisbility(WhenCopyService.SELECT_TRANSLATION_INDEX,aBoolean);
                     }
                 });
     }
 
-    /**绑定插入日历inserteventsSwitch的变化*/
-    private void checkUpdateInserteventsSwitch(RxSharedPreferences rxSharedPreferences){
-        insertevents_switch = (Switch) findViewById(R.id.insertevents_switch);
+    /**
+     * 绑定插入日历inserteventsSwitch的变化
+     */
+    private void checkUpdateInserteventsSwitch(RxSharedPreferences rxSharedPreferences) {
+        Switch insertevents_switch = (Switch) findViewById(R.id.insertevents_switch);
         insertevents_icon = (ImageView) findViewById(R.id.insertevents_icon);
 
-        inserteventsPreference = rxSharedPreferences.getBoolean("INSERTEVENTS_SWITCH",true);
+        inserteventsPreference = rxSharedPreferences.getBoolean("INSERTEVENTS_SWITCH", true);
         insertevents_switch.setChecked(inserteventsPreference.get());
+        whenCopyService.notifySelectViewVisbility(WhenCopyService.SELECT_INSERTEVENTS_INDEX,inserteventsPreference.get());
 
         RxCompoundButton.checkedChanges(insertevents_switch)
                 .subscribe(new Action1<Boolean>() {
                     @Override
                     public void call(Boolean aBoolean) {
                         inserteventsPreference.set(aBoolean);
-                        insertevents_icon.setImageResource(aBoolean?R.mipmap.insertevents_true:R.mipmap.insertevents_false);
+                        insertevents_icon.setImageResource(aBoolean ? R.mipmap.insertevents_true : R.mipmap.insertevents_false);
+                        whenCopyService.notifySelectViewVisbility(WhenCopyService.SELECT_INSERTEVENTS_INDEX,aBoolean);
                     }
                 });
     }
 
-    /**弹出关于的窗口*/
-    private void showAboutDialog(){
+    /**
+     * 弹出关于的窗口
+     */
+    private void showAboutDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("关于");
         builder.setMessage(getString(R.string.detail_about));
@@ -141,5 +146,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         builder.create().show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        unbindService(serviceConnection);
+        super.onDestroy();
     }
 }
