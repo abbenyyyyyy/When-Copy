@@ -72,5 +72,11 @@
 
     </LinearLayout>
 
+    <include
+        android:id="@+id/translationLayout"
+        layout="@layout/window_translation"
+        android:visibility="gone"
+        />
+
 
 </LinearLayout>

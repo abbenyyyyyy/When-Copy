@@ -23,7 +23,7 @@ public class TopViewController implements View.OnTouchListener, View.OnKeyListen
     private WindowManager windowManager;
     private Context context;
     private View windowView;
-    private LinearLayout displayLayout , searchSelect , translationSelect,inserteventsSelect;
+    private LinearLayout displayLayout, searchSelect, translationSelect, inserteventsSelect;
     private View.OnClickListener onClickListener;
 
     public TopViewController(Context context) {
@@ -31,17 +31,21 @@ public class TopViewController implements View.OnTouchListener, View.OnKeyListen
         windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
     }
 
-    /**显示选择窗口*/
+    /**
+     * 显示选择窗口
+     */
     public void showSelect(boolean[] visibilityFlag) {
-        windowView = LayoutInflater.from(context).inflate(R.layout.window_main, null);
+        if (windowView == null) {
+            initWindowView();
+        }
         displayLayout = (LinearLayout) windowView.findViewById(R.id.selectLayout);
 
         searchSelect = (LinearLayout) windowView.findViewById(R.id.searchSelect);
         translationSelect = (LinearLayout) windowView.findViewById(R.id.translationSelect);
         inserteventsSelect = (LinearLayout) windowView.findViewById(R.id.inserteventsSelect);
-        for(int i =0;i<visibilityFlag.length;i++){
-            if(!visibilityFlag[i]){
-                switch (i){
+        for (int i = 0; i < visibilityFlag.length; i++) {
+            if (!visibilityFlag[i]) {
+                switch (i) {
                     case WhenCopyService.SELECT_SEARCH_INDEX:
                         searchSelect.setVisibility(View.GONE);
                         break;
@@ -55,34 +59,38 @@ public class TopViewController implements View.OnTouchListener, View.OnKeyListen
             }
         }
 
-        if(onClickListener != null){
+        if (onClickListener != null) {
             searchSelect.setOnClickListener(onClickListener);
             translationSelect.setOnClickListener(onClickListener);
             inserteventsSelect.setOnClickListener(onClickListener);
         }
 
-        windowView.setOnTouchListener(this);
-        windowView.setOnKeyListener(this);
-
         windowManager.addView(windowView, getWindowLayoutParams());
     }
 
-    /**显示翻译结果*/
-    public void showTranslation(TranslationBean translationBean){
-        removeView();
+    /**
+     * 显示翻译结果
+     */
+    public void showTranslation(TranslationBean translationBean) {
 
-        windowView = LayoutInflater.from(context).inflate(R.layout.window_translation,null);
+        boolean noneNull = false;
+        if (windowView == null) {
+            initWindowView();
+            windowView.findViewById(R.id.selectLayout).setVisibility(View.GONE);
+        } else {
+            noneNull = true;
+            displayLayout.setVisibility(View.GONE);
+        }
         displayLayout = (LinearLayout) windowView.findViewById(R.id.translationLayout);
+        displayLayout.setVisibility(View.VISIBLE);
+        setTranslationView(windowView, translationBean);
 
-        setTranslationView(windowView , translationBean);
-
-        windowView.setOnTouchListener(this);
-        windowView.setOnKeyListener(this);
-
-        windowManager.addView(windowView, getWindowLayoutParams());
+        if (!noneNull) {
+            windowManager.addView(windowView, getWindowLayoutParams());
+        }
     }
 
-    public void updateOnClickListener(View.OnClickListener onClickListener){
+    public void updateOnClickListener(View.OnClickListener onClickListener) {
         this.onClickListener = onClickListener;
     }
 
@@ -90,18 +98,19 @@ public class TopViewController implements View.OnTouchListener, View.OnKeyListen
         if (windowView != null) {
             windowView.setOnKeyListener(null);
             windowView.setOnTouchListener(null);
-            if(searchSelect != null){
+            if (searchSelect != null) {
                 searchSelect.setOnClickListener(null);
                 translationSelect.setOnClickListener(null);
                 inserteventsSelect.setOnClickListener(null);
-                onClickListener = null;
+//                onClickListener = null;
             }
             windowManager.removeView(windowView);
+            windowView = null;
         }
     }
 
 
-    private void setTranslationView(View view , TranslationBean translationBean){
+    private void setTranslationView(View view, TranslationBean translationBean) {
         TextView query = (TextView) view.findViewById(R.id.queryText);
         //errorCode：
         //0 - 正常
@@ -110,7 +119,7 @@ public class TopViewController implements View.OnTouchListener, View.OnKeyListen
         //40 - 不支持的语言类型
         //50 - 无效的key
         //60 - 无词典结果，仅在获取词典结果生效
-        switch (translationBean.getErrorCode()){
+        switch (translationBean.getErrorCode()) {
             case 20:
                 query.setText("要翻译的文本过长");
                 break;
@@ -128,26 +137,48 @@ public class TopViewController implements View.OnTouchListener, View.OnKeyListen
                 break;
             case 0:
                 query.setText(translationBean.getQuery());
-                if(translationBean.getBasic().getUkphonetic() != null){
-                    view.findViewById(R.id.phoneticLayout).setVisibility(View.VISIBLE);
-                    String ukPhonetic = "英 [ " + translationBean.getBasic().getUkphonetic() + "]";
-                    ((TextView) view.findViewById(R.id.ukPhonetic)).setText(ukPhonetic);
-                    if(translationBean.getBasic().getUsphonetic() != null){
-                        String usPhonetic = "美 [ " + translationBean.getBasic().getUsphonetic() + "]";
-                        ((TextView) view.findViewById(R.id.usPhonetic)).setText(usPhonetic);
-                    }
-                }
                 LinearLayout explainsLayout = (LinearLayout) view.findViewById(R.id.explainsLayout);
-                for(String x : translationBean.getBasic().getExplains()){
+                if (translationBean.getBasic() != null) {
+                    if (translationBean.getBasic().getUkphonetic() != null) {
+                        view.findViewById(R.id.phoneticLayout).setVisibility(View.VISIBLE);
+                        String ukPhonetic = "英 [ " + translationBean.getBasic().getUkphonetic() + " ]";
+                        ((TextView) view.findViewById(R.id.ukPhonetic)).setText(ukPhonetic);
+                        if (translationBean.getBasic().getUsphonetic() != null) {
+                            String usPhonetic = "美 [ " + translationBean.getBasic().getUsphonetic() + " ]";
+                            ((TextView) view.findViewById(R.id.usPhonetic)).setText(usPhonetic);
+                        }
+                    }
+
+                    for (String x : translationBean.getBasic().getExplains()) {
+                        TextView explainsTextView = new TextView(context);
+                        explainsTextView.setText(x);
+                        explainsTextView.setTextAppearance(context, R.style.bottomTextviewTheme);
+                        explainsLayout.addView(explainsTextView);
+                    }
+                } else if (translationBean.getTranslation() != null) {
+                    for (String x : translationBean.getTranslation()) {
+                        TextView explainsTextView = new TextView(context);
+                        explainsTextView.setText(x);
+                        explainsTextView.setTextAppearance(context, R.style.bottomTextviewTheme);
+                        explainsLayout.addView(explainsTextView);
+                    }
+                } else {
                     TextView explainsTextView = new TextView(context);
-                    explainsTextView.setText(x);
+                    explainsTextView.setText("发生未知错误。");
                     explainsTextView.setTextAppearance(context, R.style.bottomTextviewTheme);
                     explainsLayout.addView(explainsTextView);
                 }
+
                 break;
             default:
                 break;
         }
+    }
+
+    private void initWindowView() {
+        windowView = LayoutInflater.from(context).inflate(R.layout.window_main, null);
+        windowView.setOnTouchListener(this);
+        windowView.setOnKeyListener(this);
     }
 
     private WindowManager.LayoutParams getWindowLayoutParams() {

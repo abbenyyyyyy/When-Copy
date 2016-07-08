@@ -132,4 +132,15 @@ public class TranslationBean {
             this.value = value;
         }
     }
+
+    @Override
+    public String toString() {
+        return "TranslationBean{" +
+                "basic=" + basic +
+                ", query='" + query + '\'' +
+                ", errorCode=" + errorCode +
+                ", translation=" + translation +
+                ", web=" + web +
+                '}';
+    }
 }

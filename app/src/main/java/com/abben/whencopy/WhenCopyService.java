@@ -65,7 +65,6 @@ public class WhenCopyService extends Service implements View.OnClickListener{
                 if ( clipData.getItemCount()==1 ){
                     text = clipData.getItemAt(0).getText().toString();
                     howToShowSleect(visibilityNumble,visibilityFlag);
-//                    new TranslationAsy().execute(text);
                 }
             }
         });
@@ -94,7 +93,6 @@ public class WhenCopyService extends Service implements View.OnClickListener{
                                 searchByBaidu(text);
                                 break;
                             case SELECT_TRANSLATION_INDEX:
-//                                topViewController.showTranslation(translationBean);
                                 new TranslationAsy().execute(text);
                                 break;
                             case SELECT_INSERTEVENTS_INDEX:
@@ -219,7 +217,6 @@ public class WhenCopyService extends Service implements View.OnClickListener{
                 break;
 
             case R.id.translationSelect:
-//                topViewController.showTranslation(translationBean);
                 new TranslationAsy().execute(text);
                 break;
 
