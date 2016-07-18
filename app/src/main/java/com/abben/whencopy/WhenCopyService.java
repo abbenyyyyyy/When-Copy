@@ -62,7 +62,8 @@ public class WhenCopyService extends Service implements View.OnClickListener{
             @Override
             public void onPrimaryClipChanged() {
                 ClipData clipData = clipboardManager.getPrimaryClip();
-                if ( clipData.getItemCount()==1 ){
+                if ( clipData.getItemCount()==1 && !clipData.getItemAt(0).getText().toString().equals("")
+                        && !topViewController.getIsShowing()){
                     text = clipData.getItemAt(0).getText().toString();
                     howToShowSleect(visibilityNumble,visibilityFlag);
                 }

@@ -26,6 +26,8 @@ public class TopViewController implements View.OnTouchListener, View.OnKeyListen
     private LinearLayout displayLayout, searchSelect, translationSelect, inserteventsSelect;
     private View.OnClickListener onClickListener;
 
+    private boolean isShowing = false;
+
     public TopViewController(Context context) {
         this.context = context;
         windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -35,6 +37,7 @@ public class TopViewController implements View.OnTouchListener, View.OnKeyListen
      * 显示选择窗口
      */
     public void showSelect(boolean[] visibilityFlag) {
+        isShowing = true;
         if (windowView == null) {
             initWindowView();
         }
@@ -72,7 +75,7 @@ public class TopViewController implements View.OnTouchListener, View.OnKeyListen
      * 显示翻译结果
      */
     public void showTranslation(TranslationBean translationBean) {
-
+        isShowing = true;
         boolean noneNull = false;
         if (windowView == null) {
             initWindowView();
@@ -104,11 +107,16 @@ public class TopViewController implements View.OnTouchListener, View.OnKeyListen
                 inserteventsSelect.setOnClickListener(null);
 //                onClickListener = null;
             }
+            isShowing = false;
             windowManager.removeView(windowView);
             windowView = null;
         }
     }
 
+    /**顶部弹框是否显示中*/
+    public boolean getIsShowing(){
+        return isShowing;
+    }
 
     private void setTranslationView(View view, TranslationBean translationBean) {
         TextView query = (TextView) view.findViewById(R.id.queryText);

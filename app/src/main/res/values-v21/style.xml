@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme.Theme.AppCompat" parent="android:Theme.Material.Light.DarkActionBar">
+        <!-- 设置appBar的背景色 -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <!--设置状态栏的颜色-->
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <!--表示CheckBox、EditText、Switch、Spinner、RadioButton等控件激活时候的色调，与之相同作用的一个属性：android:colorAccent。作用也是一样的。-->
+        <item name="colorControlActivated">@color/colorPrimary</item>
+        <!--表示CheckBox、EditText、Switch、Spinner、RadioButton等控件默认时的色调 -->
+        <item name="colorControlNormal">@color/colorPrimary</item>
+        <!--设置appBar上字体的颜色-->
+        <item name="android:textColorPrimary">@color/white</item>
+    </style>
+</resources>
