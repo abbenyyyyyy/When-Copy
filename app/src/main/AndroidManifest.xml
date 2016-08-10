@@ -21,8 +21,12 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".WhenCopyService">
-
+        <service android:name=".WhenCopyService"
+            android:process=":clipboard"
+            >
+            <intent-filter >
+                <action android:name="com.abben.whencopy.ACTION_MYSERVICE"/>
+            </intent-filter>
         </service>
     </application>
 

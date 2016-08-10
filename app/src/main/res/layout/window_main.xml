@@ -11,7 +11,9 @@
         android:layout_height="wrap_content"
         android:background="#fff"
         android:paddingTop="5dp"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="invisible"
+        >
 
         <LinearLayout
             android:id="@+id/searchSelect"

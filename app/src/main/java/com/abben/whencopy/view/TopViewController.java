@@ -11,6 +11,8 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -27,6 +29,8 @@ public class TopViewController implements View.OnTouchListener, View.OnKeyListen
     private View.OnClickListener onClickListener;
 
     private boolean isShowing = false;
+    /**是否正在过度动画中，防止多次接收过度动画导致跳帧*/
+    private boolean hiding = false;
 
     public TopViewController(Context context) {
         this.context = context;
@@ -69,6 +73,26 @@ public class TopViewController implements View.OnTouchListener, View.OnKeyListen
         }
 
         windowManager.addView(windowView, getWindowLayoutParams());
+        //此处由于displayLayout.getHeight()为0,所以暂时只能手动设置过度动画高度为246
+        Animation showAnim = new TranslateAnimation(0,0,-164,0);
+        showAnim.setDuration(200);
+        showAnim.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+                displayLayout.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        displayLayout.startAnimation(showAnim);
     }
 
     /**
@@ -98,18 +122,34 @@ public class TopViewController implements View.OnTouchListener, View.OnKeyListen
     }
 
     public void removeView() {
-        if (windowView != null) {
-            windowView.setOnKeyListener(null);
-            windowView.setOnTouchListener(null);
-            if (searchSelect != null) {
-                searchSelect.setOnClickListener(null);
-                translationSelect.setOnClickListener(null);
-                inserteventsSelect.setOnClickListener(null);
-//                onClickListener = null;
-            }
-            isShowing = false;
-            windowManager.removeView(windowView);
-            windowView = null;
+        if (windowView != null && !hiding) {
+            hiding = true;
+            Animation anim = new TranslateAnimation(0, 0, 0, -displayLayout.getHeight());
+            anim.setDuration(200);
+            anim.setAnimationListener(new Animation.AnimationListener() {
+                public void onAnimationStart(Animation animation) {
+                }
+
+                public void onAnimationRepeat(Animation animation) {
+                }
+
+                public void onAnimationEnd(Animation animation) {
+                    hiding = false;
+                    displayLayout.setVisibility(View.INVISIBLE);
+                    windowView.setOnKeyListener(null);
+                    windowView.setOnTouchListener(null);
+                    if (searchSelect != null) {
+                        searchSelect.setOnClickListener(null);
+                        translationSelect.setOnClickListener(null);
+                        inserteventsSelect.setOnClickListener(null);
+                    }
+                    isShowing = false;
+                    windowManager.removeView(windowView);
+                    windowView = null;
+                }
+            });
+            displayLayout.startAnimation(anim);
+
         }
     }
 

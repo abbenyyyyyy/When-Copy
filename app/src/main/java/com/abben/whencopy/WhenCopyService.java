@@ -1,18 +1,17 @@
 package com.abben.whencopy;
 
-
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Binder;
 import android.os.IBinder;
 import android.provider.CalendarContract;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.View;
 
 import com.abben.whencopy.view.TopViewController;
@@ -27,10 +26,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
-
 public class WhenCopyService extends Service implements View.OnClickListener{
     private String text;
-    private TranslationBean translationBean;
     private TopViewController topViewController;
     public final static int SELECT_SEARCH_INDEX = 0;
     public final static int SELECT_TRANSLATION_INDEX = 1;
@@ -42,18 +39,50 @@ public class WhenCopyService extends Service implements View.OnClickListener{
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return new MyBinder();
-    }
-
-    public class MyBinder extends Binder{
-        public WhenCopyService getService(){
-            return WhenCopyService.this;
-        }
+        return null;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        try {
+            MyReceiver myReceiver = new MyReceiver();
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Constant.ACTION_CHANGE_VISIBITY);
+            filter.addAction(Constant.ACTION_INIT);
+            registerReceiver(myReceiver, filter);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private class MyReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(Constant.ACTION_INIT.equals(intent.getAction())){
+                boolean[] initVisibityFlag = intent.getBooleanArrayExtra("initVisibity");
+                System.arraycopy(initVisibityFlag,0,visibilityFlag,0,initVisibityFlag.length);
+                int numble = 0;
+                for(boolean x : visibilityFlag){
+                    if(x){
+                        numble ++;
+                    }
+                }
+                visibilityNumble = numble;
+            }else if(Constant.ACTION_CHANGE_VISIBITY.equals(intent.getAction())){
+                int changeVisibityIndex = intent.getIntExtra("changeVisibityIndex",-1);
+                boolean changeVisibity = intent.getBooleanExtra("changeVisibity",true);
+                if(changeVisibityIndex != -1) {
+                    notifySelectViewVisbility(changeVisibityIndex,changeVisibity);
+                }
+            }
+
+        }
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
         topViewController = new TopViewController(WhenCopyService.this);
         topViewController.updateOnClickListener(this);
         final ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -69,10 +98,10 @@ public class WhenCopyService extends Service implements View.OnClickListener{
                 }
             }
         });
-
+        return super.onStartCommand(intent, flags, startId);
     }
 
-    public void notifySelectViewVisbility(int changeVisibityIndex ,boolean visibility){
+    private void notifySelectViewVisbility(int changeVisibityIndex , boolean visibility){
 
         this.visibilityFlag[changeVisibityIndex] = visibility;
         int numble = 0;
@@ -120,7 +149,7 @@ public class WhenCopyService extends Service implements View.OnClickListener{
         @Override
         protected void onPostExecute(TranslationBean translationBean2) {
             if(translationBean2!=null){
-                translationBean = translationBean2;
+                TranslationBean translationBean = translationBean2;
                 topViewController.showTranslation(translationBean);
             }
         }
