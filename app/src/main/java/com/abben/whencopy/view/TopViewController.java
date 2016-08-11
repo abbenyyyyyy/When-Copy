@@ -114,6 +114,25 @@ public class TopViewController implements View.OnTouchListener, View.OnKeyListen
 
         if (!noneNull) {
             windowManager.addView(windowView, getWindowLayoutParams());
+            Animation showAnim = new TranslateAnimation(0,0,-164,0);
+            showAnim.setDuration(200);
+            showAnim.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    displayLayout.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+            displayLayout.startAnimation(showAnim);
         }
     }
 

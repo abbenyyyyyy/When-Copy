@@ -2,58 +2,69 @@
 
 ## 简介
 
-主要是为了在手机上实现复制后自动打开以复制内容为关键字的百度搜索。之后拓展出翻译，创建日历事件备忘录。
+在手机上阅读技术或科普文章时候，遇上技术名词，有时候需要搜索或翻译了解，这时候需要复制技术名词，再打开浏览器打开搜索引擎剪切搜索，步骤繁琐，然后就有了开发这个APP的想法。  
 
-[APK下载](http://yun.baidu.com/s/1oKPuY)
+功能主要是为了在手机上实现复制后自动打开以复制内容为关键字的百度搜索。之后拓展出翻译，创建日历事件备忘录。
 
-## APP截图
-![ben.jpg](http://img1.ph.126.net/SuZKFbYqHS3HCwmJiIBPBw==/6619384355143056568.jpg)
+[APK下载](http://fir.im/nfrq)
 
-下面是复制`test`后选择翻译的效果截图
-![ben.jpg](http://img1.ph.126.net/witg4rP94K_QCBa9PXXV8w==/6630227738816930758.jpg)
-![ben.jpg](http://img2.ph.126.net/2TXmjUQtWJi8g1-gUFNVaQ==/6631355837746480769.jpg)
-![ben.jpg](http://img0.ph.126.net/8V3mDsgjQxXz4jtDKUMn2A==/6630611468375722941.jpg)
+## APP展示
+![first.gif](http://ww4.sinaimg.cn/mw690/71a00955gw1f6pkpmn7d0g209q0h51l0.gif)
 
-## 开发文档
+![second.gif](http://ww4.sinaimg.cn/mw690/71a00955gw1f6pkq9oj9fg209q0h5u12.gif)
 
-### 主要功能以及实现
+##技术要点
+* 通过另开进程的`Service`利用`ClipboardManager.addPrimaryClipChangedListener()`进行剪切板监控
+* 主进程和另一进程的`Service`通信：主进程利用`BroadcastReceiver`通知`Service`
+* 使用`sharedpreferences`持久化用户设置
 
-1. 监控剪切板的内容变化
+##更新说明
 
-通过启动`Service`利用`ClipboardManager.addPrimaryClipChangedListener()`进行监控，当剪切板内容变化时进行弹出底部悬浮窗；
+v2.2.0
+* 剪切板监控的后台服务与主进程分离，以便持久化后台服务
+* 加入显示选择和翻译弹框的过度动画
 
-2. 底部悬浮窗选择利用复制内容进行的功能：以复制内容进行百度搜索，进行翻译，或者创建日历事件备忘录
+v2.1.0
+* 改进UI，使用`Material Design`风格 
+* 修复在某些机型下自动触发显示选择和翻译弹框的BUG
 
-悬浮窗的实现是利用`WindowManager.addView()`实现；
+v2.0.0
+*  改进UI，全面更换图标
+*  架构改进，抽离选择和翻译弹框
+*  引入`RXShareperence`管理`sharedpreferences`
+*  不再需要用户设置悬浮权限显示选择和翻译弹框
 
-3. 以复制内容为关键字的百度搜索是通过输入Uri启动第三方浏览器；
+v1.0.0
+* 实现基本的功能，包括复制后自动打开以复制内容为关键字的百度搜索。之后拓展出翻译，创建日历事件备忘录。初步架构为自己思考实现的‘MVP模式’。[v1.0.0开发文档](https://abbenyyyyyy.github.io/WhenCopy-DevelopmentDocumentation.html)
 
-4. 进行翻译是通过异步线程向申请的百度翻译WEB的API进行GET请求，回传JSON数据，分析后得出翻译结果并显示；
-
-5. 创建日历事件备忘录是`Intent(Intent.ACTION_INSERT)`,传送复制内容数据到系统日历，系统日历弹出具体窗口让用户操作。
-
-### 项目结构
-这次尝试基于‘MVP模式’进行设计，主要通过`BaseAdapter`适配主页面的`ListView`实现view与数据Model的交互分离
-* app——顶级父类
-    
-	1.MyService——后台服务，APP的主功能实现都在里面。
+##计划改进
+* 增加用户设置搜索引擎，翻译引擎功能
+* 现阶段当用户设置是否使用某个功能时，是主进程是利用`BroadcastReceiver`通知另一进程的`Service`，这个需要隐式启动`Service`，而谷歌官方不建议使用这个方式，所以后续改进打算使用[EventBus](https://github.com/greenrobot/EventBus)进行消息传递
+* 增加代码混淆
 	
-* modle——数据层,数据模型
-    
-	1.MainModel——存储ListView的一个Item具体信息的模型；
-	
-	2.PreferencesController——利用`SharedPreferences`存储APP要功能的实现与否还有获得ListView的Item的数据。
-	
-* view——视图层
-	
-	1.MainActivity——主Activity里面只有一个ListView。
-	
-* presenter——主导器，操作model和view
-	
-	1.ListViewAdapter——这里利用`BaseAdapter`，activity可以把所有逻辑给presenter处理，这样业务逻辑就从手机的activity中分离出来。
-	
+## 联系方式
 
+Email:abbenyyyyyy@qq.com
 
-### 联系方式
+##License
+The MIT License (MIT)
 
-Email:407523391@qq.com
+Copyright (c) 2016 abbenyyyyyy
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

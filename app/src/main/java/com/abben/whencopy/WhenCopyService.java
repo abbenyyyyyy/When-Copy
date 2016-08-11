@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.provider.CalendarContract;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.View;
 
 import com.abben.whencopy.view.TopViewController;
@@ -111,6 +112,7 @@ public class WhenCopyService extends Service implements View.OnClickListener{
             }
         }
         visibilityNumble = numble;
+
     }
 
     private void howToShowSleect(int visibilityNumble,boolean[] visibilityFlag ){
