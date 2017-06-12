@@ -12,11 +12,13 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 
-import com.f2prateek.rx.preferences.Preference;
-import com.f2prateek.rx.preferences.RxSharedPreferences;
-import com.jakewharton.rxbinding.widget.RxCompoundButton;
+import com.f2prateek.rx.preferences2.Preference;
+import com.f2prateek.rx.preferences2.RxSharedPreferences;
+import com.jakewharton.rxbinding2.widget.RxCompoundButton;
 
-import rx.functions.Action1;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Consumer;
+
 
 public class MainActivity extends AppCompatActivity {
     private ImageView search_icon, translation_icon, insertevents_icon;
@@ -90,13 +92,12 @@ public class MainActivity extends AppCompatActivity {
         search_switch.setChecked(searchPreference.get());
 
         RxCompoundButton.checkedChanges(search_switch)
-                .subscribe(new Action1<Boolean>() {
+                .subscribe(new Consumer<Boolean>() {
                     @Override
-                    public void call(Boolean aBoolean) {
+                    public void accept(@NonNull Boolean aBoolean) throws Exception {
                         searchPreference.set(aBoolean);
                         search_icon.setImageResource(aBoolean ? R.mipmap.search_true : R.mipmap.search_false);
                         notifyVisibity(WhenCopyService.SELECT_SEARCH_INDEX,aBoolean);
-
                     }
                 });
     }
@@ -112,9 +113,9 @@ public class MainActivity extends AppCompatActivity {
         translation_switch.setChecked(translationPreference.get());
 
         RxCompoundButton.checkedChanges(translation_switch)
-                .subscribe(new Action1<Boolean>() {
+                .subscribe(new Consumer<Boolean>() {
                     @Override
-                    public void call(Boolean aBoolean) {
+                    public void accept(@NonNull Boolean aBoolean) throws Exception {
                         translationPreference.set(aBoolean);
                         translation_icon.setImageResource(aBoolean ? R.mipmap.translation_true : R.mipmap.translation_false);
                         notifyVisibity(WhenCopyService.SELECT_TRANSLATION_INDEX,aBoolean);
@@ -134,9 +135,9 @@ public class MainActivity extends AppCompatActivity {
         insertevents_switch.setChecked(inserteventsPreference.get());
 
         RxCompoundButton.checkedChanges(insertevents_switch)
-                .subscribe(new Action1<Boolean>() {
+                .subscribe(new Consumer<Boolean>() {
                     @Override
-                    public void call(Boolean aBoolean) {
+                    public void accept(@NonNull Boolean aBoolean) throws Exception {
                         inserteventsPreference.set(aBoolean);
                         insertevents_icon.setImageResource(aBoolean ? R.mipmap.insertevents_true : R.mipmap.insertevents_false);
                          notifyVisibity(WhenCopyService.SELECT_INSERTEVENTS_INDEX,aBoolean);

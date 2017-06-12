@@ -8,24 +8,26 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.IBinder;
 import android.provider.CalendarContract;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.View;
 
 import com.abben.whencopy.view.TopViewController;
 import com.google.gson.Gson;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
+
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class WhenCopyService extends Service implements View.OnClickListener{
     private String text;
@@ -33,6 +35,9 @@ public class WhenCopyService extends Service implements View.OnClickListener{
     public final static int SELECT_SEARCH_INDEX = 0;
     public final static int SELECT_TRANSLATION_INDEX = 1;
     public final static int SELECT_INSERTEVENTS_INDEX = 2;
+
+    private Api api;
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private boolean[] visibilityFlag = {false ,false, false};
     private int visibilityNumble = 0;
@@ -46,6 +51,10 @@ public class WhenCopyService extends Service implements View.OnClickListener{
     @Override
     public void onCreate() {
         super.onCreate();
+        api = new Retrofit.Builder().baseUrl("http://fanyi.youdao.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build().create(Api.class);
         try {
             MyReceiver myReceiver = new MyReceiver();
             IntentFilter filter = new IntentFilter();
@@ -102,6 +111,12 @@ public class WhenCopyService extends Service implements View.OnClickListener{
         return super.onStartCommand(intent, flags, startId);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        compositeDisposable.clear();
+    }
+
     private void notifySelectViewVisbility(int changeVisibityIndex , boolean visibility){
 
         this.visibilityFlag[changeVisibityIndex] = visibility;
@@ -125,7 +140,7 @@ public class WhenCopyService extends Service implements View.OnClickListener{
                                 searchByBaidu(text);
                                 break;
                             case SELECT_TRANSLATION_INDEX:
-                                new TranslationAsy().execute(text);
+                                translation(text);
                                 break;
                             case SELECT_INSERTEVENTS_INDEX:
                                 insertEvent(text);
@@ -146,24 +161,6 @@ public class WhenCopyService extends Service implements View.OnClickListener{
         }
     }
 
-    class TranslationAsy extends AsyncTask<String,Void,TranslationBean>{
-
-        @Override
-        protected void onPostExecute(TranslationBean translationBean2) {
-            if(translationBean2!=null){
-                TranslationBean translationBean = translationBean2;
-                topViewController.showTranslation(translationBean);
-            }
-        }
-
-        @Override
-        protected TranslationBean doInBackground(String... params) {
-            String needTranslationText = params[0];
-            return translation(needTranslationText);
-        }
-
-    }
-
 
     /**启动百度搜索*/
     private void searchByBaidu(String text){
@@ -181,64 +178,43 @@ public class WhenCopyService extends Service implements View.OnClickListener{
         startActivity(intent);
     }
 
-    /**得到有道翻译的结果*/
-    private TranslationBean translation(String value){
+    /**得到有道翻译的结果并显示*/
+    private void translation(String value){
         //范例:http://fanyi.youdao.com/openapi.do?keyfrom=When-Copy&key=870362664&type=data&doctype=<doctype>&version=1.1&q=要翻译的文本
-        TranslationBean translationBean = new TranslationBean();
-        HttpURLConnection connection ;
-        String encode = null;
-        try {
-            encode = URLEncoder.encode(value,"UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        String all_url = "http://fanyi.youdao.com/openapi.do?keyfrom=When-Copy&key=870362664&type=data&doctype=json&version=1.1&q="
-                + encode;
-        try {
-            URL url = new URL(all_url);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setDoInput(true);
-            connection.setDoOutput(true);
-            connection.setUseCaches(false);
-            connection.setRequestMethod("GET");
-            String jsonString = readStream(connection.getInputStream()).replace("-","");
-            Gson gson = new Gson();
-            translationBean = gson.fromJson(jsonString,TranslationBean.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return translationBean;
+        api.translation("When-Copy","870362664","data","json","1.1",value)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ResponseBody>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        compositeDisposable.add(d);
+                    }
+
+                    @Override
+                    public void onNext(@NonNull ResponseBody responseBody) {
+                        try {
+                            String result = responseBody.string();
+                            Gson gson = new Gson();
+                            topViewController.showTranslation(gson.fromJson(result.replace("-",""),TranslationBean.class));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        //请求错误
+                        topViewController.removeView();
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 
-    /**通过readStream方法将字节流变成字符流，获得完整的网络数据JSON格式数据*/
-    private String readStream(InputStream in){
-        InputStreamReader re = null;
-        String result = "";
-        try {
-            String line = "";
-            re = new InputStreamReader(in, "utf-8");
-            BufferedReader bufferedReader = new BufferedReader(re);
-            try {
-                while((line = bufferedReader.readLine())!=null){
-                    result += line;
-                }
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        } catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }finally{
-            try {
-                re.close();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        return result;
-    }
+
 
     @Override
     public void onClick(View v) {
@@ -247,16 +223,13 @@ public class WhenCopyService extends Service implements View.OnClickListener{
                 searchByBaidu(text);
                 topViewController.removeView();
                 break;
-
             case R.id.translationSelect:
-                new TranslationAsy().execute(text);
+                translation(text);
                 break;
-
             case R.id.inserteventsSelect:
                 insertEvent(text);
                 topViewController.removeView();
                 break;
-
         }
     }
 
