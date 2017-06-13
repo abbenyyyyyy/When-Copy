@@ -15,10 +15,15 @@
 
 ##技术要点
 * 通过另开进程的`Service`利用`ClipboardManager.addPrimaryClipChangedListener()`进行剪切板监控
-* 主进程和另一进程的`Service`通信：主进程利用`BroadcastReceiver`通知`Service`
-* 使用`sharedpreferences`持久化用户设置
+* IPC方式(主进程和另一进程的`Service`通信)：<del>主进程利用`BroadcastReceiver`通知`Service`</del>，2.3.3已更换IPC方式为AIDL
+* 使用`SharedPreferences`持久化用户设置
 
 ##更新说明
+
+v2.3.3
+* 引入APP更新检查下载功能
+* IPC(跨进程通讯)方式从BroadcastReceiver更换为AIDL，以修复开启APP时候初始化白屏问题
+* 更新RxJava2,移除RxBinding和RxShareperence
 
 v2.2.0
 * 剪切板监控的后台服务与主进程分离，以便持久化后台服务
@@ -31,7 +36,7 @@ v2.1.0
 v2.0.0
 *  改进UI，全面更换图标
 *  架构改进，抽离选择和翻译弹框
-*  引入`RXShareperence`管理`sharedpreferences`
+*  引入`RxShareperence`管理`sharedpreferences`
 *  不再需要用户设置悬浮权限显示选择和翻译弹框
 
 v1.0.0
@@ -39,7 +44,6 @@ v1.0.0
 
 ##计划改进
 * 增加用户设置搜索引擎，翻译引擎功能
-* 现阶段当用户设置是否使用某个功能时，是主进程是利用`BroadcastReceiver`通知另一进程的`Service`，这个需要隐式启动`Service`，而谷歌官方不建议使用这个方式，所以后续改进打算使用[EventBus](https://github.com/greenrobot/EventBus)进行消息传递
 * 增加代码混淆
 	
 ## 联系方式

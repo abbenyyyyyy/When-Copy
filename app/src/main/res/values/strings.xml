@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">When Copy</string>
+    <string name="about">关于</string>
+    <string name="positive">确认</string>
+    <string name="negative">取消</string>
+    <string name="update_message">APP有更新，请问是否更新？</string>
 
     <string name="detail_about">&#160;&#160;&#160;&#160;When&#160;&#160;Copy是一个个人开发的APP，所以不可避免存在BUG，若你发现BUG，希望能向作者反馈，谢谢使用。\n&#160;&#160;&#160;&#160;作者邮箱：ben714656@163.com</string>
 </resources>

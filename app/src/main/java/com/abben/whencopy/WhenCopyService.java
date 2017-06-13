@@ -1,16 +1,16 @@
 package com.abben.whencopy;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.provider.CalendarContract;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.View;
 
 import com.abben.whencopy.view.TopViewController;
@@ -45,7 +45,34 @@ public class WhenCopyService extends Service implements View.OnClickListener{
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return new CustomAidlInterface.Stub(){
+
+            @Override
+            public void initServiceVisibilityFlag(boolean visibilitySearch, boolean visibilityTranslation, boolean visibilityInsertevents) throws RemoteException {
+                visibilityFlag[0] = visibilitySearch;
+                visibilityFlag[1] = visibilityTranslation;
+                visibilityFlag[2] = visibilityInsertevents;
+                int numble = 0;
+                for(boolean x : visibilityFlag){
+                    if(x){
+                        numble ++;
+                    }
+                }
+                visibilityNumble = numble;
+            }
+
+            @Override
+            public void changeView(int changeVisibityIndex, boolean visibility) throws RemoteException {
+                visibilityFlag[changeVisibityIndex] = visibility;
+                int numble = 0;
+                for(boolean x : visibilityFlag){
+                    if(x){
+                        numble ++;
+                    }
+                }
+                visibilityNumble = numble;
+            }
+        };
     }
 
     @Override
@@ -55,44 +82,6 @@ public class WhenCopyService extends Service implements View.OnClickListener{
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build().create(Api.class);
-        try {
-            MyReceiver myReceiver = new MyReceiver();
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(Constant.ACTION_CHANGE_VISIBITY);
-            filter.addAction(Constant.ACTION_INIT);
-            registerReceiver(myReceiver, filter);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private class MyReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if(Constant.ACTION_INIT.equals(intent.getAction())){
-                boolean[] initVisibityFlag = intent.getBooleanArrayExtra("initVisibity");
-                System.arraycopy(initVisibityFlag,0,visibilityFlag,0,initVisibityFlag.length);
-                int numble = 0;
-                for(boolean x : visibilityFlag){
-                    if(x){
-                        numble ++;
-                    }
-                }
-                visibilityNumble = numble;
-            }else if(Constant.ACTION_CHANGE_VISIBITY.equals(intent.getAction())){
-                int changeVisibityIndex = intent.getIntExtra("changeVisibityIndex",-1);
-                boolean changeVisibity = intent.getBooleanExtra("changeVisibity",true);
-                if(changeVisibityIndex != -1) {
-                    notifySelectViewVisbility(changeVisibityIndex,changeVisibity);
-                }
-            }
-
-        }
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
         topViewController = new TopViewController(WhenCopyService.this);
         topViewController.updateOnClickListener(this);
         final ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -108,8 +97,8 @@ public class WhenCopyService extends Service implements View.OnClickListener{
                 }
             }
         });
-        return super.onStartCommand(intent, flags, startId);
     }
+
 
     @Override
     public void onDestroy() {
@@ -117,18 +106,7 @@ public class WhenCopyService extends Service implements View.OnClickListener{
         compositeDisposable.clear();
     }
 
-    private void notifySelectViewVisbility(int changeVisibityIndex , boolean visibility){
 
-        this.visibilityFlag[changeVisibityIndex] = visibility;
-        int numble = 0;
-        for(boolean x : visibilityFlag){
-            if(x){
-                numble ++;
-            }
-        }
-        visibilityNumble = numble;
-
-    }
 
     private void howToShowSleect(int visibilityNumble,boolean[] visibilityFlag ){
         switch (visibilityNumble){

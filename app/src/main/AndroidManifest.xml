@@ -4,6 +4,7 @@
     >
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <!--android:theme="@style/AppTheme"-->
     <application
         android:allowBackup="true"
@@ -23,11 +24,7 @@
 
         <service android:name=".WhenCopyService"
             android:process=":clipboard"
-            >
-            <intent-filter >
-                <action android:name="com.abben.whencopy.ACTION_MYSERVICE"/>
-            </intent-filter>
-        </service>
+            />
     </application>
 
 </manifest>
