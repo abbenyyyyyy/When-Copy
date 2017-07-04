@@ -1,14 +1,17 @@
 package com.abben.whencopy;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.CalendarContract;
+import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
@@ -30,6 +33,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class WhenCopyService extends Service implements View.OnClickListener{
+    private static final String TAG = "WhenCopyService";
     private String text;
     private TopViewController topViewController;
     public final static int SELECT_SEARCH_INDEX = 0;
@@ -42,9 +46,11 @@ public class WhenCopyService extends Service implements View.OnClickListener{
     private boolean[] visibilityFlag = {false ,false, false};
     private int visibilityNumble = 0;
 
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        Log.i("abben", "onBind: ");
         return new CustomAidlInterface.Stub(){
 
             @Override
@@ -78,6 +84,7 @@ public class WhenCopyService extends Service implements View.OnClickListener{
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.i("abben", "onCreate: ");
         api = new Retrofit.Builder().baseUrl("http://fanyi.youdao.com/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
@@ -97,13 +104,32 @@ public class WhenCopyService extends Service implements View.OnClickListener{
                 }
             }
         });
+
+
     }
 
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        Log.i("abben", "onStartCommand: ");
+        if(intent != null) {
+            if(intent.hasExtra("initData")){
+                Bundle bundle = intent.getBundleExtra("initData");
+                if(bundle.containsKey("notification")){
+                    this.startForeground(13, (Notification)bundle.getParcelable("notification"));// 开始前台服务
+                }
+            }
+        }
+
+        return super.onStartCommand(intent, flags, startId);
+    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
         compositeDisposable.clear();
+        stopForeground(true);
     }
 
 

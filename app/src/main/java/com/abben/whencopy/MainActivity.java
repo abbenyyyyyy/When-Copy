@@ -16,16 +16,13 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
-import android.widget.Toast;
 
 import com.abben.whencopy.bean.UpdateBean;
 import com.abben.whencopy.network.RetrofitHelper;
@@ -40,7 +37,6 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import okhttp3.internal.Util;
 
 public class MainActivity extends AppCompatActivity {
     private ImageView search_icon, translation_icon, insertevents_icon;
@@ -51,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences preferences;
     private CustomAidlInterface customAidlInterface;
     private AdditionServiceConnection additionServiceConnection;
+    private Intent intentService;
+    private WCApplication wcApplication = null;
 
     private long appDownloadId;
 
@@ -58,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        wcApplication = (WCApplication) getApplicationContext();
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         mCompositeDisposable = new CompositeDisposable();
         initService();
@@ -69,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unbindService(additionServiceConnection);
+        stopService(intentService);
         mCompositeDisposable.clear();
     }
 
@@ -89,8 +89,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void initService() {
         additionServiceConnection = new AdditionServiceConnection();
-        Intent intent = new Intent(MainActivity.this,WhenCopyService.class);
-        bindService(intent, additionServiceConnection, Context.BIND_AUTO_CREATE);
+        intentService = new Intent(MainActivity.this,WhenCopyService.class);
+        Bundle var7 = new Bundle();
+        var7.putParcelable("notification",wcApplication.notification);
+        intentService.putExtra("initData",var7);
+        startService(intentService);
+        bindService(intentService, additionServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     private void initView() {
@@ -124,7 +128,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /**通知另一进程的服务改变VisibilityFlag*/
+
+    /**
+     * 通知另一进程的服务改变VisibilityFlag
+     * @param changeVisibityIndex 要改变的服务所属位置
+     * @param visibility 是否显示
+     */
     private void notifyVisibity(int changeVisibityIndex , boolean visibility){
         try {
             customAidlInterface.changeView(changeVisibityIndex,visibility);
@@ -243,8 +252,11 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+
     /**
      * 比较本地应用的版本号和服务器的版本号，是否需要更新
+     * @param updateBean 服务器版本相关信息
+     * @return
      */
     private boolean compareLocalAndServer(UpdateBean updateBean){
         try {
@@ -258,7 +270,7 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    public void showDialog(final UpdateBean updateBean) {
+    private void showDialog(final UpdateBean updateBean) {
         CustomDialog.Builder builder = new CustomDialog.Builder(this);
         if(updateBean.getChangelog() != null && !updateBean.getChangelog().equals("")){
             builder.setMessage(updateBean.getChangelog() + "\n" + getString(R.string.update_message));
@@ -281,8 +293,12 @@ public class MainActivity extends AppCompatActivity {
         builder.create().show();
     }
 
+
     /**
      * 获取当前应用的版本号
+     * @param context
+     * @return
+     * @throws PackageManager.NameNotFoundException
      */
     private String getLocalAPPVersion(Context context) throws PackageManager.NameNotFoundException {
         PackageManager packageManager = context.getPackageManager();
@@ -291,9 +307,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startDownload(String downloadUrl){
+        String apkName = "WhenCopy.apk";
+        //先删除本地的APK
+        File nextDownloadApp = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), apkName);
+        if (nextDownloadApp.exists()) {
+            nextDownloadApp.delete();
+        }
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
         request.setTitle("WhenCopy下载");
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,"WhenCopy.apk");
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,apkName);
         DownloadManager downloadManager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
         appDownloadId = downloadManager.enqueue(request);
         //注册广播接收器
