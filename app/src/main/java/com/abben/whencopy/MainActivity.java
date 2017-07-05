@@ -12,10 +12,12 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -68,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unbindService(additionServiceConnection);
-        stopService(intentService);
         mCompositeDisposable.clear();
     }
 
@@ -93,8 +94,8 @@ public class MainActivity extends AppCompatActivity {
         Bundle var7 = new Bundle();
         var7.putParcelable("notification",wcApplication.notification);
         intentService.putExtra("initData",var7);
-        startService(intentService);
         bindService(intentService, additionServiceConnection, Context.BIND_AUTO_CREATE);
+        startService(intentService);
     }
 
     private void initView() {
@@ -334,24 +335,37 @@ public class MainActivity extends AppCompatActivity {
                 //获取当前完成任务的ID
                 long  referenceId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID,-1);
                 if(appDownloadId == referenceId){
-                    String appFilePath = Environment.getExternalStorageDirectory() +File.separator
+                    String apkFilePath = Environment.getExternalStorageDirectory() +File.separator
                             + Environment.DIRECTORY_DOWNLOADS + File.separator + "WhenCopy.apk";
-                    installApk(appFilePath);
+                    installApk(apkFilePath);
                 }
             }
         }
     };
 
     /**发出安装APK的意图给用户*/
-    private void installApk(String appFilePath){
-        File appFile = new File(appFilePath);
-        // 创建URI
-        Uri uri = Uri.fromFile(appFile);
+    private void installApk(String apkFilePath){
+        File apkFile = new File(apkFilePath);
+        if(!apkFile.exists()){
+            return;
+        }
         // 创建Intent意图
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        // 设置Uri和类型
-        intent.setDataAndType(uri, "application/vnd.android.package-archive");
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // 创建URI
+        Uri apkUri;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+            // 声明需要的临时权限
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            // content:// 协议
+            apkUri = FileProvider.getUriForFile(this, "com.abben.whencopy.fileProvider", apkFile);
+        }else{
+            apkUri = Uri.fromFile(apkFile);
+        }
+
+        // 设置Uri和类型
+        intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+
         // 执行意图进行安装
         startActivity(intent);
     }

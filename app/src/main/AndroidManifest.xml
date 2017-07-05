@@ -15,7 +15,9 @@
         >
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,6 +28,19 @@
         <service android:name=".WhenCopyService"
             android:process=":clipboard"
             />
+
+        <!--7.0访问文件夹权限-->
+        <provider
+            android:authorities="com.abben.whencopy.fileProvider"
+            android:name="android.support.v4.content.FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true"
+            >
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_path"
+                />
+        </provider>
     </application>
 
 </manifest>
