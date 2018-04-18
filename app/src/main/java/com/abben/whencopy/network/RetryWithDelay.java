@@ -8,7 +8,7 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Function;
 
 /**
- * Created by Shaolin on 2017/5/16.
+ * Created by abbenyyy on 2017/5/16.
  */
 
 public class RetryWithDelay implements Function<Observable<?extends Throwable>,ObservableSource<?>>{
@@ -22,7 +22,6 @@ public class RetryWithDelay implements Function<Observable<?extends Throwable>,O
         this.retryDelaySeconds = retryDelaySeconds;
         retryCount = 0;
     }
-
 
     @Override
     public ObservableSource<?> apply(@NonNull Observable<? extends Throwable> observable) throws Exception {
