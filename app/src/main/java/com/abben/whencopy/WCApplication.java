@@ -11,17 +11,19 @@ import android.content.Intent;
  * Created by abbenyyy on 2017/7/4.
  */
 
-public class WCApplication extends Application{
+public class WCApplication extends Application {
     public Notification notification = null;
 
     @Override
     public void onCreate() {
         super.onCreate();
         // 若为创建独立进程，则不初始化成员变量
-        if(getCurProcessName(getApplicationContext()).equals("com.abben.whencopy:clipboard")){
+        if (getCurProcessName(getApplicationContext()).equals("com.abben.whencopy:clipboard")) {
             return;
         }
         initNotification();
+        CrashHandler crashHandler = CrashHandler.getInstance();
+        crashHandler.init(this);
     }
 
     private String getCurProcessName(Context context) {
@@ -39,8 +41,7 @@ public class WCApplication extends Application{
         Notification.Builder builder = new Notification.Builder(this);
         Intent notificationIntent = new Intent(this, MainActivity.class);
         // 设置PendingIntent
-        builder.setContentIntent(PendingIntent.getActivity(this, 0, notificationIntent, 0))
-                .setContentTitle(getString(R.string.app_name)) // 设置下拉列表里的标题
+        builder.setContentIntent(PendingIntent.getActivity(this, 0, notificationIntent, 0)).setContentTitle(getString(R.string.app_name)) // 设置下拉列表里的标题
                 .setSmallIcon(R.mipmap.icon) // 设置状态栏内的小图标
                 .setContentText("正在监控剪切板...")// 设置上下文内容
                 .setWhen(System.currentTimeMillis()); // 设置该通知发生的时间
